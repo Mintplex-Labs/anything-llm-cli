@@ -1,0 +1,42 @@
+{
+	"name": "anything-llm-cli",
+	"version": "1.0.0",
+	"description": "A CLI tool to interact with AnythingLLM from the terminal",
+	"type": "module",
+	"bin": {
+		"any": "dist/index.js"
+	},
+	"files": [
+		"dist/index.js"
+	],
+	"keywords": [
+		"anythingllm",
+		"llm",
+		"cli",
+		"ai"
+	],
+	"license": "MIT",
+	"scripts": {
+		"start": "bun run src/index.ts",
+		"build": "bun build --compile --minify --outfile=dist/any src/index.ts",
+		"build:publish": "bun build --minify --target=node --banner '#!/usr/bin/env node' --outfile=dist/index.js src/index.ts",
+		"prepublishOnly": "bun run build:publish",
+		"lint": "bunx biome check --write",
+		"build:linux-x64": "bun build --compile --minify --target=bun-linux-x64 --outfile=dist/any-linux-x64 src/index.ts",
+		"build:linux-arm64": "bun build --compile --minify --target=bun-linux-arm64 --outfile=dist/any-linux-arm64 src/index.ts",
+		"build:windows-x64": "bun build --compile --minify --target=bun-windows-x64 --outfile=dist/any-windows-x64.exe src/index.ts",
+		"build:darwin-x64": "bun build --compile --minify --target=bun-darwin-x64 --outfile=dist/any-darwin-x64 src/index.ts",
+		"build:darwin-arm64": "bun build --compile --minify --target=bun-darwin-arm64 --outfile=dist/any-darwin-arm64 src/index.ts",
+		"build:all": "bun run build:linux-x64 && bun run build:linux-arm64 && bun run build:windows-x64 && bun run build:darwin-x64 && bun run build:darwin-arm64"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.15",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"commander": "^14.0.3"
+	}
+}
