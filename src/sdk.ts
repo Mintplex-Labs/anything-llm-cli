@@ -562,5 +562,54 @@ declare namespace AnythingLLM {
 		metrics: Metrics;
 	};
 
-	type StreamChunk = TextResponseStreamChunk | FinalizeResponseStreamChunk;
+	type StreamChunk =
+		| TextResponseStreamChunk
+		| FinalizeResponseStreamChunk
+		| AgentStreamChunk;
+
+	type BaseAgentStreamChunk = {
+		id: string;
+		type: "textResponse" | "agentThought";
+		sources: { title: string; chunk: string }[];
+		attachments: Attachment[];
+	};
+
+	type AgentToolCallInvocationChunk = BaseAgentStreamChunk & {
+		type: "textResponse";
+		textResponse: ToolCallInvocationData;
+	};
+
+	type AgentThoughtChunk = BaseAgentStreamChunk & {
+		type: "agentThought";
+		thought: string;
+	};
+
+	type AgentTextResponseData = {
+		uuid: string;
+		type: "textResponseChunk";
+		content: string;
+	};
+	type AgentTextResponseChunk = BaseAgentStreamChunk & {
+		type: "textResponse";
+		textResponse: AgentTextResponseData;
+	};
+
+	type AgentFinalizeResponseChunk = BaseAgentStreamChunk & {
+		type: "finalizeResponseStream";
+		textResponse: string;
+		thoughts: string[];
+		close: true;
+	};
+
+	type AgentStreamChunk =
+		| AgentToolCallInvocationChunk
+		| AgentThoughtChunk
+		| AgentTextResponseChunk
+		| AgentFinalizeResponseChunk;
+
+	type ToolCallInvocationData = {
+		uuid: string;
+		type: "toolCallInvocation";
+		content: string;
+	};
 }

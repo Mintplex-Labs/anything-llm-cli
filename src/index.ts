@@ -52,10 +52,10 @@ program
 			stdinput = await readStdin();
 		}
 
-		let constructedPrompt = `<prompt>${prompt}</prompt>`;
+		let constructedPrompt = `${prompt}`;
 
 		if (stdinput) {
-			constructedPrompt = `<stdinput>${stdinput}</stdinput>${constructedPrompt}`;
+			constructedPrompt = `${stdinput} ${constructedPrompt}`;
 		}
 
 		const llm = new AnythingLLM({
@@ -114,8 +114,26 @@ program
 				});
 
 		for await (const chunk of stream) {
+			// Regular chat
 			if (chunk.type === "textResponseChunk") {
 				process.stdout.write(chunk.textResponse);
+				// agent chat
+			} else if (
+				chunk.type === "textResponse" ||
+				chunk.type === "agentThought"
+			) {
+				if (chunk.type === "agentThought") {
+					process.stdout.write(chunk.thought);
+				}
+
+				if (chunk.type === "textResponse") {
+					if (chunk.textResponse.type === "toolCallInvocation") {
+						process.stdout.write(chunk.textResponse.content);
+					} else {
+						if (chunk.textResponse?.content)
+							process.stdout.write(chunk.textResponse.content);
+					}
+				}
 			}
 		}
 
