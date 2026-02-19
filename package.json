@@ -17,6 +17,7 @@
 	],
 	"license": "MIT",
 	"scripts": {
+		"setup": "cp .env.example .env.local && bun install",
 		"start": "bun run src/index.ts",
 		"build": "bun build --compile --minify --outfile=dist/any src/index.ts",
 		"build:npm": "bun build --minify --target=node --banner '#!/usr/bin/env node' --outfile=dist/index.js src/index.ts",

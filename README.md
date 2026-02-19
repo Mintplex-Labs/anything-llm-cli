@@ -51,34 +51,36 @@ Requires [Bun](https://bun.sh).
 ```bash
 git clone https://github.com/mintplex-labs/anyllm-cli.git
 cd anyllm-cli
-bun install
+bun run setup
+```
 
-# Run directly
-bun run src/index.ts prompt "Hello!"
+This installs dependencies and creates a `.env.local` file from `.env.example`. Open `.env.local` and fill in your values (see [Environment Variables](#environment-variables) below).
 
-# Or compile a native binary
+Then run with:
+
+```bash
+bun run start prompt "Hello!"
+```
+
+Or compile a native binary:
+
+```bash
 bun run build
 ./dist/any prompt "Hello!"
 ```
 
 ## Setup
 
-Set your AnythingLLM API key as an environment variable. You can generate one from your AnythingLLM instance under **Settings > Developer API**.
+You can generate an API key from your AnythingLLM instance under **Settings > Developer API**.
+
+If running from source, fill in your `.env.local` file — Bun loads it automatically.
+
+For the npm package or standalone binary, set environment variables directly:
 
 ```bash
 export ANYTHING_LLM_API_KEY="your-api-key"
-```
-
-If your AnythingLLM instance is not running on `http://localhost:3001`, set the base URL:
-
-```bash
-export ANYTHING_LLM_BASE_URL="https://my-instance.example.com"
-```
-
-Optionally, set a default workspace so you don't need to pass `-w` every time:
-
-```bash
-export ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG="my-workspace"
+export ANYTHING_LLM_BASE_URL="https://my-instance.example.com"  # default: http://localhost:3001
+export ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG="my-workspace"       # optional, avoids needing -w
 ```
 
 > **Tip:** Add these to your `.bashrc`, `.zshrc`, or `.env` file for persistence.
