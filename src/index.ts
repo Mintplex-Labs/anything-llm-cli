@@ -113,17 +113,30 @@ program
 					message: constructedPrompt,
 				});
 
-		const dim = "\x1b[2m";
-		const reset = "\x1b[0m";
+		// Disable ANSI codes when piped to a file so output is clean plaintext.
+		const isTTY = process.stdout.isTTY === true;
+		const dim = isTTY ? "\x1b[2m" : "";
+		const reset = isTTY ? "\x1b[0m" : "";
 		let assembling = false;
+		let lastAssembly = "";
 		let hasResponse = false;
 
+		// Tool call assembly comes as incremental chunks (e.g. "web-browsing({"query":" ...).
+		// In a TTY we overwrite the same line with \r; when piped we suppress the
+		// incremental updates and write only the final assembled line here.
 		const endAssembly = () => {
 			if (!assembling) return;
-			process.stdout.write("\n");
+			if (!isTTY && lastAssembly) {
+				process.stdout.write(`${lastAssembly}\n`);
+			} else {
+				process.stdout.write("\n");
+			}
 			assembling = false;
+			lastAssembly = "";
 		};
 
+		// Adds a blank line separator before the first response token
+		// so the actual answer is visually separated from agent metadata.
 		const writeResponse = (text: string) => {
 			endAssembly();
 			if (!hasResponse) {
@@ -134,6 +147,7 @@ program
 		};
 
 		for await (const chunk of stream) {
+			// Regular (non-agent) chat token
 			if (chunk.type === "textResponseChunk") {
 				writeResponse(chunk.textResponse);
 			} else if (chunk.type === "agentThought") {
@@ -142,9 +156,14 @@ program
 			} else if (chunk.type === "textResponse" && chunk.textResponse) {
 				const resp = chunk.textResponse as { type: string; content: string };
 				if (resp.type === "toolCallInvocation") {
-					process.stdout.write(`\r\x1b[K${dim}${resp.content}${reset}`);
+					// In a TTY, overwrite the current line to show assembly progress in place.
+					if (isTTY) {
+						process.stdout.write(`\r\x1b[K${dim}${resp.content}${reset}`);
+					}
+					lastAssembly = resp.content;
 					assembling = true;
 				} else if (resp.type === "textResponseChunk") {
+					// Agent response token
 					writeResponse(resp.content);
 				}
 			}
