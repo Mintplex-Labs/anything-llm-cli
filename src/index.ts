@@ -25,7 +25,8 @@ program
 
 program
 	.command("prompt")
-	.description("Send a prompt to the LLM")
+	.alias("p")
+	.description("Send a prompt")
 	.argument("<message...>", "The prompt message to send")
 	.requiredOption(
 		`-w, --workspace <slug>`,
