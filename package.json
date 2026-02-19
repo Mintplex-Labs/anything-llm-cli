@@ -19,8 +19,8 @@
 	"scripts": {
 		"start": "bun run src/index.ts",
 		"build": "bun build --compile --minify --outfile=dist/any src/index.ts",
-		"build:publish": "bun build --minify --target=node --banner '#!/usr/bin/env node' --outfile=dist/index.js src/index.ts",
-		"prepublishOnly": "bun run build:publish",
+		"build:npm": "bun build --minify --target=node --banner '#!/usr/bin/env node' --outfile=dist/index.js src/index.ts",
+		"prepublishOnly": "bun run build:npm",
 		"lint": "bunx biome check --write",
 		"build:linux-x64": "bun build --compile --minify --target=bun-linux-x64 --outfile=dist/any-linux-x64 src/index.ts",
 		"build:linux-arm64": "bun build --compile --minify --target=bun-linux-arm64 --outfile=dist/any-linux-arm64 src/index.ts",
