@@ -102,9 +102,14 @@ Running `any` with no arguments displays the help screen.
 | Flag | Description |
 | --- | --- |
 | `-w, --workspace <slug>` | **(required)** Workspace slug (or set `ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG`) |
+| `-a, --attach <path...>` | Attach files to the prompt (images, PDFs, etc.) |
 | `-t, --thread [slug]` | Use a specific thread for the conversation |
 | `--nt, --new-thread` | Start a new thread for this conversation |
 | `-S, --no-stream` | Disable streaming (wait for full response) |
+
+#### Supported attachment types
+
+`png`, `jpg`, `jpeg`, `gif`, `webp`, `svg`, `pdf`, `txt`, `csv`, `json`, `md`, `doc`, `docx`, `xls`, `xlsx`
 
 ### Examples
 
@@ -166,6 +171,20 @@ any prompt "Write a summary of AnythingLLM" > summary.md
 ```
 
 > When piped to a file, ANSI formatting is automatically stripped and agent tool call assembly is cleaned up for readable plaintext output.
+
+**Attach files (images, PDFs, etc.):**
+
+```bash
+any prompt "What's in this image?" -a ./photo.png
+```
+
+```bash
+any prompt "Compare these documents" -a report.pdf notes.pdf
+```
+
+```bash
+any prompt "Summarize all of these" -a file1.pdf file2.pdf file3.pdf
+```
 
 **Agent workspaces:**
 
