@@ -1,7 +1,8 @@
 import { program } from "commander";
 import packageJson from "../package.json";
 import { AnythingLLM } from "./sdk";
-import { buildBanner } from "./utils";
+import buildBanner from "./utils/banner.ts";
+import fileToAttachment from "./utils/convert_file_to_attachment";
 
 function readStdin(): Promise<string> {
 	return new Promise((resolve) => {
@@ -39,6 +40,10 @@ program
 	)
 	.option("-S, --no-stream", "Disable streaming responses")
 	.option("--nt, --new-thread", "Start a new thread for this conversation.")
+	.option(
+		"-a, --attach <path...>",
+		"Attach files to the prompt (images, PDFs, etc.)",
+	)
 	.action(async (messageArgs: string[], opts) => {
 		const prompt = messageArgs.join(" ");
 
@@ -58,6 +63,10 @@ program
 		if (stdinput) {
 			constructedPrompt = `${stdinput} ${constructedPrompt}`;
 		}
+
+		const attachments = opts.attach
+			? (opts.attach as string[]).map(fileToAttachment)
+			: undefined;
 
 		const llm = new AnythingLLM({
 			apiKey: anythingLlmApiKey,
@@ -85,10 +94,12 @@ program
 						threadSlug,
 						message: constructedPrompt,
 						workspaceSlug: opts.workspace,
+						attachments,
 					})
 				: await llm.workspaces.chat({
 						slug: opts.workspace,
 						message: constructedPrompt,
+						attachments,
 					});
 
 			if (!result.ok) {
@@ -107,11 +118,13 @@ program
 					threadSlug,
 					mode: "chat",
 					message: constructedPrompt,
+					attachments,
 				})
 			: llm.workspaces.streamChat({
 					slug: workspaceSlug,
 					mode: "chat",
 					message: constructedPrompt,
+					attachments,
 				});
 
 		// Disable ANSI codes when piped to a file so output is clean plaintext.

@@ -1,4 +1,4 @@
-export function buildBanner(): string {
+export default function buildBanner(): string {
 	const rgb = (r: number, g: number, b: number, t: string) =>
 		`\x1b[1;38;2;${r};${g};${b}m${t}\x1b[0m`;
 	const dim = (t: string) => `\x1b[38;5;243m${t}\x1b[0m`;
