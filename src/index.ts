@@ -115,42 +115,37 @@ program
 
 		const dim = "\x1b[2m";
 		const reset = "\x1b[0m";
-		const clearLine = "\r\x1b[K";
 		let assembling = false;
 		let hasResponse = false;
 
+		const endAssembly = () => {
+			if (!assembling) return;
+			process.stdout.write("\n");
+			assembling = false;
+		};
+
+		const writeResponse = (text: string) => {
+			endAssembly();
+			if (!hasResponse) {
+				process.stdout.write("\n");
+				hasResponse = true;
+			}
+			process.stdout.write(text);
+		};
+
 		for await (const chunk of stream) {
 			if (chunk.type === "textResponseChunk") {
-				if (assembling) {
-					process.stdout.write("\n");
-					assembling = false;
-				}
-				if (!hasResponse) {
-					process.stdout.write("\n");
-					hasResponse = true;
-				}
-				process.stdout.write(chunk.textResponse);
+				writeResponse(chunk.textResponse);
 			} else if (chunk.type === "agentThought") {
-				if (assembling) {
-					process.stdout.write("\n");
-					assembling = false;
-				}
+				endAssembly();
 				process.stdout.write(`${dim}${chunk.thought}${reset}\n`);
 			} else if (chunk.type === "textResponse" && chunk.textResponse) {
 				const resp = chunk.textResponse as { type: string; content: string };
 				if (resp.type === "toolCallInvocation") {
-					process.stdout.write(`${clearLine}${dim}${resp.content}${reset}`);
+					process.stdout.write(`\r\x1b[K${dim}${resp.content}${reset}`);
 					assembling = true;
 				} else if (resp.type === "textResponseChunk") {
-					if (assembling) {
-						process.stdout.write("\n");
-						assembling = false;
-					}
-					if (!hasResponse) {
-						process.stdout.write("\n");
-						hasResponse = true;
-					}
-					process.stdout.write(resp.content);
+					writeResponse(resp.content);
 				}
 			}
 		}
