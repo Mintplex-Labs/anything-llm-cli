@@ -54,11 +54,11 @@ cd anyllm-cli
 bun install
 
 # Run directly
-bun run src/index.ts -p "Hello!"
+bun run src/index.ts prompt "Hello!"
 
 # Or compile a native binary
 bun run build
-./dist/any -p "Hello!"
+./dist/any prompt "Hello!"
 ```
 
 ## Setup
@@ -86,61 +86,90 @@ export ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG="my-workspace"
 ## Usage
 
 ```
-any -p <prompt> -w <workspace-slug> [options]
+any prompt <message> [options]
 ```
 
-### Options
+Running `any` with no arguments displays the help screen.
+
+### Commands
+
+| Command | Alias | Description |
+| --- | --- | --- |
+| `prompt <message...>` | `p` | Send a prompt to the LLM |
+
+### Options (for `prompt`)
 
 | Flag | Description |
 | --- | --- |
-| `-p, --prompt <prompt>` | **(required)** The prompt to send to the LLM |
 | `-w, --workspace <slug>` | **(required)** Workspace slug (or set `ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG`) |
 | `-t, --thread [slug]` | Use a specific thread for the conversation |
 | `--nt, --new-thread` | Start a new thread for this conversation |
 | `-S, --no-stream` | Disable streaming (wait for full response) |
-| `-V, --version` | Print the version |
-| `-h, --help` | Show help |
 
 ### Examples
 
 **Simple prompt:**
 
 ```bash
-any -p "What is AnythingLLM?" -w my-workspace
+any prompt "What is AnythingLLM?"
+```
+
+**Multi-word prompts without quotes:**
+
+```bash
+any prompt What is AnythingLLM
+```
+
+**Using the short alias:**
+
+```bash
+any p "What is AnythingLLM?"
 ```
 
 **Pipe in context from another command:**
 
 ```bash
-cat error.log | any -p "Explain these errors" -w my-workspace
+cat error.log | any prompt "Explain these errors"
 ```
 
 ```bash
-git diff | any -p "Write a commit message for these changes" -w my-workspace
+git diff | any prompt "Write a commit message for these changes"
 ```
 
 ```bash
-curl -s https://api.example.com/data | any -p "Summarize this JSON" -w my-workspace
+curl -s https://api.example.com/data | any prompt "Summarize this JSON"
 ```
 
 **Use a specific thread for ongoing conversations:**
 
 ```bash
-any -p "Let's continue our discussion" -w my-workspace -t thread-slug
+any prompt "Let's continue our discussion" -t thread-slug
 ```
 
 **Start a new thread:**
 
 ```bash
-any -p "Start a fresh conversation about testing" -w my-workspace --new-thread
+any prompt "Start a fresh conversation about testing" --new-thread
 ```
 
 **Disable streaming (useful for scripting):**
 
 ```bash
-RESULT=$(any -p "Give me a one-word answer: yes or no?" -w my-workspace -S)
+RESULT=$(any prompt "Give me a one-word answer: yes or no?" -S)
 echo "The LLM said: $RESULT"
 ```
+
+**Save the response to a file:**
+
+```bash
+any prompt "Write a summary of AnythingLLM" > summary.md
+```
+
+> When piped to a file, ANSI formatting is automatically stripped and agent tool call assembly is cleaned up for readable plaintext output.
+
+**Agent workspaces:**
+
+Agent workspaces that use tools (web browsing, scraping, etc.) are fully supported. In the terminal, tool call assembly updates in place and agent thoughts are dimmed for readability. When piped to a file, output is clean plaintext.
 
 ## TypeScript SDK
 
