@@ -1,7 +1,46 @@
+import { readFileSync } from "node:fs";
+import { basename, extname, resolve } from "node:path";
 export class AnythingLLM {
 	private apiKey: string = process.env.ANYTHINGLLM_API_KEY || "";
 	private baseUrl: URL = new URL("http://localhost:3001");
 
+	static fileToAttachment(filePath: string) {
+		const SUPPORTED_MIME_TYPES: Record<string, string> = {
+			".png": "image/png",
+			".jpg": "image/jpeg",
+			".jpeg": "image/jpeg",
+			".gif": "image/gif",
+			".webp": "image/webp",
+			// ".svg": "image/svg+xml",
+			// ".pdf": "application/pdf",
+			// ".txt": "text/plain",
+			// ".csv": "text/csv",
+			// ".json": "application/json",
+			// ".md": "text/markdown",
+			// ".doc": "application/msword",
+			// ".docx":
+			// 	"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+			// ".xls": "application/vnd.ms-excel",
+			// ".xlsx":
+			// 	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+		};
+		const resolved = resolve(filePath);
+		const ext = extname(resolved).toLowerCase();
+		const mime = SUPPORTED_MIME_TYPES[ext];
+		if (!mime) {
+			console.error(
+				`Unsupported file type: ${ext}\nSupported: ${Object.keys(SUPPORTED_MIME_TYPES).join(", ")}`,
+			);
+			process.exit(1);
+		}
+		const buffer = readFileSync(resolved);
+		const base64 = buffer.toString("base64");
+		return {
+			name: basename(resolved),
+			mime,
+			contentString: `data:${mime};base64,${base64}`,
+		};
+	}
 	private streamResponse(
 		endpoint: string,
 		body: Record<string, unknown>,

@@ -1,5 +1,4 @@
 import { AnythingLLM } from "../../../sdk";
-import { fileToAttachment } from "./utils/convert_file_to_attachment";
 import { readStdin } from "./utils/read_stdin";
 
 const DEFAULT_WORKSPACE_SLUG = "anythingllm-cli-default-workspace";
@@ -30,7 +29,7 @@ export async function promptHandler(
 	const constructedPrompt = stdinput ? `${stdinput} ${prompt}` : prompt;
 
 	const attachments = opts.attach
-		? opts.attach.map(fileToAttachment)
+		? opts.attach.map(AnythingLLM.fileToAttachment)
 		: undefined;
 
 	const client = new AnythingLLM({
