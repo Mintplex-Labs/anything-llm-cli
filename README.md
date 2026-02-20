@@ -1,6 +1,6 @@
 # AnythingLLM CLI
 
-A fast, lightweight command-line interface for chatting with your [AnythingLLM](https://anythingllm.com) instance directly from the terminal. Pipe in context, stream responses, and manage conversations — all without leaving your shell.
+A command-line interface for chatting with your [AnythingLLM](https://anythingllm.com) instance from the terminal.
 
 ```
 ╔════════════════════════════════════════════════════════════════╗
@@ -32,12 +32,6 @@ curl -fsSL https://raw.githubusercontent.com/Mintplex-Labs/anything-llm-cli/main
 
 This detects your platform, downloads the latest binary, and installs it to `/usr/local/bin`. Run it again to update.
 
-To uninstall:
-
-```bash
-sudo rm /usr/local/bin/any
-```
-
 ### Via package manager
 
 ```bash
@@ -50,11 +44,9 @@ pnpm add -g @mintplex-labs/anything-llm-cli
 bun install -g @mintplex-labs/anything-llm-cli
 ```
 
-This installs the `any` command globally.
-
 ### Standalone binary
 
-Download a prebuilt binary for your platform from the [Releases](https://github.com/mintplex-labs/anything-llm-cli/releases) page and place it somewhere on your `PATH`.
+Download a prebuilt binary from the [Releases](https://github.com/mintplex-labs/anything-llm-cli/releases) page and place it somewhere on your `PATH`.
 
 | Platform    | Binary                |
 | ----------- | --------------------- |
@@ -64,48 +56,27 @@ Download a prebuilt binary for your platform from the [Releases](https://github.
 | Linux ARM   | `any-linux-arm64`     |
 | Windows x64 | `any-windows-x64.exe` |
 
-### From source
+## Quickstart
 
-Requires [Bun](https://bun.sh).
+1. **Get your API key** from your AnythingLLM instance under **Settings > Developer API**.
 
-```bash
-git clone https://github.com/mintplex-labs/anything-llm-cli.git
-cd anything-llm-cli
-bun run setup
-```
+2. **Set your environment variables:**
 
-This installs dependencies and creates a `.env.local` file from `.env.example`. Open `.env.local` and fill in your values (see [Environment Variables](#environment-variables) below).
+   ```bash
+   export ANYTHING_LLM_API_KEY="your-api-key"
+   # Optional — defaults to http://localhost:3001
+   export ANYTHING_LLM_BASE_URL="https://my-instance.example.com"
+   ```
 
-Then run with:
+   > **Tip:** Add these to your `.bashrc` or `.zshrc` for persistence.
 
-```bash
-bun run start prompt "Hello!"
-```
+3. **Send your first prompt:**
 
-Or compile a native binary:
+   ```bash
+   any prompt "What is AnythingLLM?"
+   ```
 
-```bash
-bun run build
-./dist/any prompt "Hello!"
-```
-
-## Setup
-
-The only required setup is your API key. You can generate one from your AnythingLLM instance under **Settings > Developer API**.
-
-If running from source, fill in your `.env.local` file — Bun loads it automatically.
-
-For the npm package or standalone binary, set environment variables directly:
-
-```bash
-export ANYTHING_LLM_API_KEY="your-api-key"
-export ANYTHING_LLM_BASE_URL="https://my-instance.example.com"  # optional, default: http://localhost:3001
-export ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG="my-workspace"       # optional, avoids needing -w
-```
-
-If no workspace is specified via `-w` or the environment variable, the CLI will automatically create and use a default workspace.
-
-> **Tip:** Add these to your `.bashrc`, `.zshrc`, or `.env` file for persistence.
+That's it! If no workspace is specified, the CLI will automatically create and use a default one.
 
 ## Usage
 
@@ -113,15 +84,7 @@ If no workspace is specified via `-w` or the environment variable, the CLI will 
 any prompt <message> [options]
 ```
 
-Running `any` with no arguments displays the help screen.
-
-### Commands
-
-| Command               | Alias | Description              |
-| --------------------- | ----- | ------------------------ |
-| `prompt <message...>` | `p`   | Send a prompt to the LLM |
-
-### Options (for `prompt`)
+### Options
 
 | Flag                     | Description                                                                                                      |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
@@ -131,153 +94,34 @@ Running `any` with no arguments displays the help screen.
 | `--nt, --new-thread`     | Start a new thread for this conversation                                                                         |
 | `-S, --no-stream`        | Disable streaming (wait for full response)                                                                       |
 
-#### Supported attachment types
-
-`png`, `jpg`, `jpeg`, `gif`, `webp`
-
 ### Examples
 
-**Simple prompt:**
-
 ```bash
-any prompt "What is AnythingLLM?"
-```
-
-**Multi-word prompts without quotes:**
-
-```bash
+# Simple prompt (quotes optional)
 any prompt What is AnythingLLM
-```
 
-**Using the short alias:**
-
-```bash
-any p "What is AnythingLLM?"
-```
-
-**Pipe in context from another command:**
-
-```bash
+# Pipe in context
 cat error.log | any prompt "Explain these errors"
-```
-
-```bash
 git diff | any prompt "Write a commit message for these changes"
-```
 
-```bash
-curl -s https://api.example.com/data | any prompt "Summarize this JSON"
-```
+# Use a specific workspace
+any prompt "Hello" -w my-workspace
 
-**Use a specific thread for ongoing conversations:**
+# Threads for ongoing conversations
+any prompt "Let's talk about testing" --new-thread
+any prompt "Continue where we left off" -t thread-slug
 
-```bash
-any prompt "Let's continue our discussion" -t thread-slug
-```
-
-**Start a new thread:**
-
-```bash
-any prompt "Start a fresh conversation about testing" --new-thread
-```
-
-**Disable streaming (useful for scripting):**
-
-```bash
-RESULT=$(any prompt "Give me a one-word answer: yes or no?" -S)
-echo "The LLM said: $RESULT"
-```
-
-**Save the response to a file:**
-
-```bash
-any prompt "Write a summary of AnythingLLM" > summary.md
-```
-
-> When piped to a file, ANSI formatting is automatically stripped and agent tool call assembly is cleaned up for readable plaintext output.
-
-**Attach images:**
-
-```bash
+# Attach images
 any prompt "What's in this image?" -a ./photo.png
+
+# Scripting (no streaming, capture output)
+RESULT=$(any prompt "Give me a one-word answer: yes or no?" -S)
+
+# Save response to a file
+any prompt "Write a summary" > summary.md
 ```
 
-```bash
-any prompt "Compare these images" -a image1.png image2.jpg
-```
-
-**Agent workspaces:**
-
-Agent workspaces that use tools (web browsing, scraping, etc.) are fully supported. In the terminal, tool call assembly updates in place and agent thoughts are dimmed for readability. When piped to a file, output is clean plaintext.
-
-## TypeScript SDK
-
-The project also includes a fully-typed TypeScript SDK (`AnythingLLM` class) that you can use programmatically:
-
-```typescript
-import { AnythingLLM } from "./src/sdk";
-
-const client = new AnythingLLM({
-  apiKey: "your-api-key",
-  baseUrl: "http://localhost:3001",
-});
-
-// Send a chat message
-const result = await client.workspaces.chat({
-  slug: "my-workspace",
-  message: "Hello!",
-});
-
-if (result.ok) {
-  console.log(result.data.textResponse);
-}
-
-// Stream a response
-const stream = client.workspaces.streamChat({
-  slug: "my-workspace",
-  message: "Tell me a story",
-  mode: "chat",
-});
-
-for await (const chunk of stream) {
-  if (chunk.type === "textResponseChunk") {
-    process.stdout.write(chunk.textResponse);
-  }
-}
-```
-
-### SDK Methods
-
-| Method                                                       | Description                                |
-| ------------------------------------------------------------ | ------------------------------------------ |
-| `workspaces.list()`                                          | List all workspaces                        |
-| `workspaces.get({ slug })`                                   | Get a workspace by slug                    |
-| `workspaces.create({ name, ... })`                           | Create a new workspace                     |
-| `workspaces.chat({ slug, message })`                         | Send a message and get a complete response |
-| `workspaces.streamChat({ slug, message })`                   | Stream a response as SSE chunks            |
-| `threads.create({ workspaceSlug, title })`                   | Create a new thread in a workspace         |
-| `threads.chat({ workspaceSlug, threadSlug, message })`       | Chat within a thread                       |
-| `threads.streamChat({ workspaceSlug, threadSlug, message })` | Stream a response within a thread          |
-| `threads.getMessages({ workspaceSlug, threadSlug? })`        | Get chat history                           |
-
-## Development
-
-```bash
-# Install dependencies
-bun install
-
-# Run in development
-bun run start
-
-# Lint and format
-bun run lint
-
-# Build for current platform
-bun run build
-
-# Build for all platforms
-bun run build:all
-```
+> When piped or redirected, ANSI formatting is automatically stripped for clean plaintext output. Agent workspaces with tools (web browsing, scraping, etc.) are fully supported.
 
 ## Environment Variables
 
@@ -287,6 +131,24 @@ bun run build:all
 | `ANYTHING_LLM_BASE_URL`               | No       | `http://localhost:3001` | Base URL of your AnythingLLM instance             |
 | `ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG` | No       | —                       | Default workspace slug (avoids needing `-w` flag) |
 
-## License
+## Development
 
-[MIT](LICENSE)
+Requires [Bun](https://bun.sh).
+
+```bash
+git clone https://github.com/mintplex-labs/anything-llm-cli.git
+cd anything-llm-cli
+bun run setup          # Install deps + create .env.local
+bun run start prompt "Hello!"   # Run in development
+bun run build          # Compile native binary → dist/any
+```
+
+## Uninstall
+
+```bash
+# If installed via install script
+sudo rm /usr/local/bin/any
+
+# If installed via package manager
+npm uninstall -g @mintplex-labs/anything-llm-cli
+```
