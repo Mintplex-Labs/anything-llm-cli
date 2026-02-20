@@ -22,7 +22,7 @@ export async function promptHandler(
 	}
 
 	let stdinput = "";
-	if (process.stdin.isTTY === false) {
+	if (!process.stdin.isTTY) {
 		stdinput = await readStdin();
 	}
 
