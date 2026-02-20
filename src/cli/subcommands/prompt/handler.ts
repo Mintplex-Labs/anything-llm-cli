@@ -152,6 +152,12 @@ export async function promptHandler(
 	};
 
 	for await (const chunk of stream) {
+		if (chunk.type === "abort") {
+			endAssembly();
+			console.error(`\nStream aborted: ${chunk.error}`);
+			process.exit(1);
+		}
+
 		// Regular (non-agent) chat token
 		if (chunk.type === "textResponseChunk") {
 			writeResponse(chunk.textResponse);

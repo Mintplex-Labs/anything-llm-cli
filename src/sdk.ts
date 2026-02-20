@@ -550,6 +550,13 @@ declare namespace AnythingLLM {
 		attachments: Attachment[];
 	};
 
+	type AbortStreamChunk = BaseStreamChunk & {
+		type: "abort";
+		textResponse: null;
+		close: true;
+		error: string;
+	};
+
 	type TextResponseStreamChunk = BaseStreamChunk & {
 		type: "textResponseChunk";
 		textResponse: string;
@@ -565,6 +572,7 @@ declare namespace AnythingLLM {
 	type StreamChunk =
 		| TextResponseStreamChunk
 		| FinalizeResponseStreamChunk
+		| AbortStreamChunk
 		| AgentStreamChunk;
 
 	type BaseAgentStreamChunk = {
