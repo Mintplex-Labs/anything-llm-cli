@@ -17,6 +17,7 @@ function readStdin(): Promise<string> {
 
 const anythingLLmDefaultWorkspaceSlug =
 	process.env.ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG;
+const DEFAULT_WORKSPACE_SLUG = "anythingllm-cli-default-workspace";
 
 program
 	.name("any")
@@ -58,11 +59,7 @@ program
 			stdinput = await readStdin();
 		}
 
-		let constructedPrompt = `${prompt}`;
-
-		if (stdinput) {
-			constructedPrompt = `${stdinput} ${constructedPrompt}`;
-		}
+		const constructedPrompt = stdinput ? `${stdinput} ${prompt}` : prompt;
 
 		const attachments = opts.attach
 			? (opts.attach as string[]).map(fileToAttachment)
@@ -73,11 +70,10 @@ program
 			baseUrl: process.env.ANYTHING_LLM_BASE_URL,
 		});
 
-		const workspaceSlug: string =
-			opts.workspace || "anythingllm-cli-default-workspace";
+		const workspaceSlug = opts.workspace || DEFAULT_WORKSPACE_SLUG;
 
-		// If no workspace is specified and the ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG environment variable is not set, use a default workspace slug and ensure the workspace exists. This allows users to get started without needing to set up a workspace first.
-		if (workspaceSlug === "anythingllm-cli-default-workspace") {
+		// No workspace specified — ensure the default workspace exists, creating it if needed.
+		if (workspaceSlug === DEFAULT_WORKSPACE_SLUG) {
 			const getWorkspaceResult = await llm.workspaces.get({
 				slug: workspaceSlug,
 			});
