@@ -33,7 +33,7 @@ export async function promptHandler(
 		? (opts.attach as string[]).map(fileToAttachment)
 		: undefined;
 
-	const llm = new AnythingLLM({
+	const client = new AnythingLLM({
 		apiKey: anythingLlmApiKey,
 		baseUrl: process.env.ANYTHING_LLM_BASE_URL,
 	});
@@ -42,7 +42,7 @@ export async function promptHandler(
 
 	// No workspace specified — ensure the default workspace exists, creating it if needed.
 	if (workspaceSlug === DEFAULT_WORKSPACE_SLUG) {
-		const getWorkspaceResult = await llm.workspaces.get({
+		const getWorkspaceResult = await client.workspaces.get({
 			slug: workspaceSlug,
 		});
 
@@ -54,7 +54,7 @@ export async function promptHandler(
 		}
 
 		if (getWorkspaceResult.data.workspace.length === 0) {
-			const workspaceResult = await llm.workspaces.create({
+			const workspaceResult = await client.workspaces.create({
 				name: `AnythingLLM CLI Default Workspace`,
 				systemPrompt: `You are a helpful assistant responding to prompts from the AnythingLLM CLI tool. You will sometimes receive context passed in from the stdinput.`,
 			});
@@ -67,7 +67,7 @@ export async function promptHandler(
 	}
 	let threadSlug: string | undefined = opts.thread;
 	if (opts.newThread) {
-		const threadResult = await llm.threads.create({
+		const threadResult = await client.threads.create({
 			workspaceSlug,
 			title: `AnythingLLM CLI Thread - ${new Date().toLocaleString()}`,
 		});
@@ -82,13 +82,13 @@ export async function promptHandler(
 
 	if (!opts.stream) {
 		const result = threadSlug
-			? await llm.threads.chat({
+			? await client.threads.chat({
 					threadSlug,
 					message: constructedPrompt,
 					workspaceSlug,
 					attachments,
 				})
-			: await llm.workspaces.chat({
+			: await client.workspaces.chat({
 					slug: workspaceSlug,
 					message: constructedPrompt,
 					attachments,
@@ -104,14 +104,14 @@ export async function promptHandler(
 	}
 
 	const stream = threadSlug
-		? llm.threads.streamChat({
+		? client.threads.streamChat({
 				workspaceSlug,
 				threadSlug,
 				mode: "chat",
 				message: constructedPrompt,
 				attachments,
 			})
-		: llm.workspaces.streamChat({
+		: client.workspaces.streamChat({
 				slug: workspaceSlug,
 				mode: "chat",
 				message: constructedPrompt,
@@ -152,12 +152,6 @@ export async function promptHandler(
 	};
 
 	for await (const chunk of stream) {
-		if (chunk.type === "abort") {
-			endAssembly();
-			console.error(`\nStream aborted: ${chunk.error}`);
-			process.exit(1);
-		}
-
 		// Regular (non-agent) chat token
 		if (chunk.type === "textResponseChunk") {
 			writeResponse(chunk.textResponse);
