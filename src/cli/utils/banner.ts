@@ -1,3 +1,4 @@
+import packageJson from "../../../package.json";
 export function buildBanner(): string {
 	const rgb = (r: number, g: number, b: number, t: string) =>
 		`\x1b[1;38;2;${r};${g};${b}m${t}\x1b[0m`;
@@ -29,7 +30,7 @@ export function buildBanner(): string {
 	];
 
 	const tagline = "✦ Chat with your AnythingLLM instance from the terminal ✦";
-	const version = "v1.0.0";
+	const version = `v${packageJson.version}`;
 
 	// W = inner content width (between the ║ borders)
 	const W = Math.max(...artPlain.map((l) => l.length)) + 2; // +2 for breathing room
