@@ -38,10 +38,16 @@ To uninstall:
 sudo rm /usr/local/bin/any
 ```
 
-### Via npm
+### Via package manager
 
 ```bash
-npm install -g anything-llm-cli
+npm install -g @mintplex-labs/anything-llm-cli
+# or
+yarn global add @mintplex-labs/anything-llm-cli
+# or
+pnpm add -g @mintplex-labs/anything-llm-cli
+# or
+bun install -g @mintplex-labs/anything-llm-cli
 ```
 
 This installs the `any` command globally.
@@ -50,13 +56,13 @@ This installs the `any` command globally.
 
 Download a prebuilt binary for your platform from the [Releases](https://github.com/mintplex-labs/anything-llm-cli/releases) page and place it somewhere on your `PATH`.
 
-| Platform      | Binary               |
-| ------------- | -------------------- |
-| macOS ARM     | `any-darwin-arm64`   |
-| macOS Intel   | `any-darwin-x64`     |
-| Linux x64     | `any-linux-x64`      |
-| Linux ARM     | `any-linux-arm64`    |
-| Windows x64   | `any-windows-x64.exe`|
+| Platform    | Binary                |
+| ----------- | --------------------- |
+| macOS ARM   | `any-darwin-arm64`    |
+| macOS Intel | `any-darwin-x64`      |
+| Linux x64   | `any-linux-x64`       |
+| Linux ARM   | `any-linux-arm64`     |
+| Windows x64 | `any-windows-x64.exe` |
 
 ### From source
 
@@ -111,19 +117,19 @@ Running `any` with no arguments displays the help screen.
 
 ### Commands
 
-| Command | Alias | Description |
-| --- | --- | --- |
-| `prompt <message...>` | `p` | Send a prompt to the LLM |
+| Command               | Alias | Description              |
+| --------------------- | ----- | ------------------------ |
+| `prompt <message...>` | `p`   | Send a prompt to the LLM |
 
 ### Options (for `prompt`)
 
-| Flag | Description |
-| --- | --- |
+| Flag                     | Description                                                                                                      |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
 | `-w, --workspace <slug>` | Workspace slug. Falls back to `ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG` env var, or auto-creates a default workspace |
-| `-a, --attach <path...>` | Attach image files to the prompt (png, jpg, jpeg, gif, webp) |
-| `-t, --thread [slug]` | Use a specific thread for the conversation |
-| `--nt, --new-thread` | Start a new thread for this conversation |
-| `-S, --no-stream` | Disable streaming (wait for full response) |
+| `-a, --attach <path...>` | Attach image files to the prompt (png, jpg, jpeg, gif, webp)                                                     |
+| `-t, --thread [slug]`    | Use a specific thread for the conversation                                                                       |
+| `--nt, --new-thread`     | Start a new thread for this conversation                                                                         |
+| `-S, --no-stream`        | Disable streaming (wait for full response)                                                                       |
 
 #### Supported attachment types
 
@@ -242,17 +248,17 @@ for await (const chunk of stream) {
 
 ### SDK Methods
 
-| Method | Description |
-| --- | --- |
-| `workspaces.list()` | List all workspaces |
-| `workspaces.get({ slug })` | Get a workspace by slug |
-| `workspaces.create({ name, ... })` | Create a new workspace |
-| `workspaces.chat({ slug, message })` | Send a message and get a complete response |
-| `workspaces.streamChat({ slug, message })` | Stream a response as SSE chunks |
-| `threads.create({ workspaceSlug, title })` | Create a new thread in a workspace |
-| `threads.chat({ workspaceSlug, threadSlug, message })` | Chat within a thread |
-| `threads.streamChat({ workspaceSlug, threadSlug, message })` | Stream a response within a thread |
-| `threads.getMessages({ workspaceSlug, threadSlug? })` | Get chat history |
+| Method                                                       | Description                                |
+| ------------------------------------------------------------ | ------------------------------------------ |
+| `workspaces.list()`                                          | List all workspaces                        |
+| `workspaces.get({ slug })`                                   | Get a workspace by slug                    |
+| `workspaces.create({ name, ... })`                           | Create a new workspace                     |
+| `workspaces.chat({ slug, message })`                         | Send a message and get a complete response |
+| `workspaces.streamChat({ slug, message })`                   | Stream a response as SSE chunks            |
+| `threads.create({ workspaceSlug, title })`                   | Create a new thread in a workspace         |
+| `threads.chat({ workspaceSlug, threadSlug, message })`       | Chat within a thread                       |
+| `threads.streamChat({ workspaceSlug, threadSlug, message })` | Stream a response within a thread          |
+| `threads.getMessages({ workspaceSlug, threadSlug? })`        | Get chat history                           |
 
 ## Development
 
@@ -275,11 +281,11 @@ bun run build:all
 
 ## Environment Variables
 
-| Variable | Required | Default | Description |
-| --- | --- | --- | --- |
-| `ANYTHING_LLM_API_KEY` | Yes | — | Your AnythingLLM API key |
-| `ANYTHING_LLM_BASE_URL` | No | `http://localhost:3001` | Base URL of your AnythingLLM instance |
-| `ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG` | No | — | Default workspace slug (avoids needing `-w` flag) |
+| Variable                              | Required | Default                 | Description                                       |
+| ------------------------------------- | -------- | ----------------------- | ------------------------------------------------- |
+| `ANYTHING_LLM_API_KEY`                | Yes      | —                       | Your AnythingLLM API key                          |
+| `ANYTHING_LLM_BASE_URL`               | No       | `http://localhost:3001` | Base URL of your AnythingLLM instance             |
+| `ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG` | No       | —                       | Default workspace slug (avoids needing `-w` flag) |
 
 ## License
 
