@@ -32,6 +32,14 @@ npm install -g anything-llm-cli
 
 This installs the `any` command globally.
 
+### Install script (macOS/Linux)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Mintplex-Labs/anything-llm-cli/main/install.sh | sh
+```
+
+This detects your platform, downloads the latest binary, and installs it to `/usr/local/bin`. Run it again to update.
+
 ### Standalone binary
 
 Download a prebuilt binary for your platform from the [Releases](https://github.com/mintplex-labs/anything-llm-cli/releases) page and place it somewhere on your `PATH`.
