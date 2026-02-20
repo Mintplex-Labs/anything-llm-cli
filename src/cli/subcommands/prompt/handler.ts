@@ -30,7 +30,7 @@ export async function promptHandler(
 	const constructedPrompt = stdinput ? `${stdinput} ${prompt}` : prompt;
 
 	const attachments = opts.attach
-		? (opts.attach as string[]).map(fileToAttachment)
+		? opts.attach.map(fileToAttachment)
 		: undefined;
 
 	const client = new AnythingLLM({
