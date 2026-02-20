@@ -7,7 +7,7 @@ program
 	.name("any")
 	.description("A simple CLI tool to interact with AnythingLLM")
 	.version(packageJson.version)
-	.addHelpText("before", buildBanner());
+	.addHelpText("before", await buildBanner());
 
 registerPromptCommand(program);
 

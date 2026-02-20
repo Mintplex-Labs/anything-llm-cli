@@ -1,16 +1,46 @@
 import packageJson from "../../../package.json";
-export function buildBanner(): string {
+
+async function health(): Promise<boolean> {
+	const baseUrl = process.env.ANYTHING_LLM_BASE_URL || "http://localhost:3001";
+	try {
+		const res = await fetch(`${baseUrl}/api/ping`, {
+			method: "GET",
+			signal: AbortSignal.timeout(2000),
+		});
+		return res.ok;
+	} catch {
+		return false;
+	}
+}
+export async function buildBanner(): Promise<string> {
+	const isHealthy = await health();
+
 	const rgb = (r: number, g: number, b: number, t: string) =>
 		`\x1b[1;38;2;${r};${g};${b}m${t}\x1b[0m`;
 	const dim = (t: string) => `\x1b[38;5;243m${t}\x1b[0m`;
-	const br = (t: string) => rgb(90, 200, 170, t);
+	const warn = (t: string) => `\x1b[1;38;5;214m${t}\x1b[0m`;
 
-	// Mint green (#46FFC8) to ice blue (#7BCFE0) gradient
+	const br = isHealthy
+		? (t: string) => rgb(90, 200, 170, t)
+		: (t: string) => rgb(200, 60, 60, t);
+
 	const lerp = (a: number, b: number, t: number) => Math.round(a + (b - a) * t);
-	const gradient = (i: number, total: number, text: string) => {
-		const t = i / (total - 1);
-		return rgb(lerp(70, 123, t), lerp(255, 207, t), lerp(200, 224, t), text);
-	};
+	const gradient = isHealthy
+		? (i: number, total: number, text: string) => {
+				// Mint green (#46FFC8) to ice blue (#7BCFE0)
+				const t = i / (total - 1);
+				return rgb(
+					lerp(70, 123, t),
+					lerp(255, 207, t),
+					lerp(200, 224, t),
+					text,
+				);
+			}
+		: (i: number, total: number, text: string) => {
+				// Dark red to bright red
+				const t = i / (total - 1);
+				return rgb(lerp(180, 220, t), lerp(40, 70, t), lerp(40, 60, t), text);
+			};
 
 	// Plain-text rows (no ANSI). We'll measure, find max width, then colorize.
 	const artPlain = [
@@ -83,6 +113,35 @@ export function buildBanner(): string {
 	// Tagline - centered
 	const tagLeft = Math.floor((W - tagline.length) / 2);
 	lines.push(row(" ".repeat(tagLeft) + dim(tagline), tagLeft + tagline.length));
+
+	if (!isHealthy) {
+		lines.push(empty());
+
+		const centeredLines = [
+			"Could not connect to your AnythingLLM instance.",
+			"Ensure it is running and these env vars are set:",
+		];
+
+		for (const cl of centeredLines) {
+			const left = Math.max(0, Math.floor((W - cl.length) / 2));
+			lines.push(row(" ".repeat(left) + warn(cl), left + cl.length));
+		}
+
+		lines.push(empty());
+
+		const envLines = [
+			"ANYTHING_LLM_API_KEY   - API key for your instance",
+			"ANYTHING_LLM_BASE_URL  - Instance URL",
+		];
+
+		// Left-align the env var block as a group, centered within the box.
+		const maxEnvLen = Math.max(...envLines.map((l) => l.length));
+		const envLeft = Math.max(0, Math.floor((W - maxEnvLen) / 2));
+
+		for (const el of envLines) {
+			lines.push(row(" ".repeat(envLeft) + warn(el), envLeft + el.length));
+		}
+	}
 
 	lines.push(empty(), bot, "");
 	return lines.join("\n");
