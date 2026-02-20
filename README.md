@@ -24,14 +24,6 @@ A fast, lightweight command-line interface for chatting with your [AnythingLLM](
 
 ## Install
 
-### Via npm (recommended)
-
-```bash
-npm install -g anything-llm-cli
-```
-
-This installs the `any` command globally.
-
 ### Install script (macOS/Linux)
 
 ```bash
@@ -39,6 +31,20 @@ curl -fsSL https://raw.githubusercontent.com/Mintplex-Labs/anything-llm-cli/main
 ```
 
 This detects your platform, downloads the latest binary, and installs it to `/usr/local/bin`. Run it again to update.
+
+To uninstall:
+
+```bash
+sudo rm /usr/local/bin/any
+```
+
+### Via npm
+
+```bash
+npm install -g anything-llm-cli
+```
+
+This installs the `any` command globally.
 
 ### Standalone binary
 
