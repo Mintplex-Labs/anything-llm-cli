@@ -23,7 +23,7 @@ export function registerPromptCommand(program: Command) {
 		.option("--nt, --new-thread", "Start a new thread for this conversation.")
 		.option(
 			"-a, --attach <path...>",
-			"Attach files to the prompt (images, PDFs, etc.)",
+			"Attach image files to the prompt (png, jpg, jpeg, gif, webp)",
 		)
 		.action(promptHandler);
 }

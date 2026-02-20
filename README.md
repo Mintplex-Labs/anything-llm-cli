@@ -120,14 +120,14 @@ Running `any` with no arguments displays the help screen.
 | Flag | Description |
 | --- | --- |
 | `-w, --workspace <slug>` | Workspace slug. Falls back to `ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG` env var, or auto-creates a default workspace |
-| `-a, --attach <path...>` | Attach files to the prompt (images, PDFs, etc.) |
+| `-a, --attach <path...>` | Attach image files to the prompt (png, jpg, jpeg, gif, webp) |
 | `-t, --thread [slug]` | Use a specific thread for the conversation |
 | `--nt, --new-thread` | Start a new thread for this conversation |
 | `-S, --no-stream` | Disable streaming (wait for full response) |
 
 #### Supported attachment types
 
-`png`, `jpg`, `jpeg`, `gif`, `webp`, `svg`, `pdf`, `txt`, `csv`, `json`, `md`, `doc`, `docx`, `xls`, `xlsx`
+`png`, `jpg`, `jpeg`, `gif`, `webp`
 
 ### Examples
 
@@ -190,18 +190,14 @@ any prompt "Write a summary of AnythingLLM" > summary.md
 
 > When piped to a file, ANSI formatting is automatically stripped and agent tool call assembly is cleaned up for readable plaintext output.
 
-**Attach files (images, PDFs, etc.):**
+**Attach images:**
 
 ```bash
 any prompt "What's in this image?" -a ./photo.png
 ```
 
 ```bash
-any prompt "Compare these documents" -a report.pdf notes.pdf
-```
-
-```bash
-any prompt "Summarize all of these" -a file1.pdf file2.pdf file3.pdf
+any prompt "Compare these images" -a image1.png image2.jpg
 ```
 
 **Agent workspaces:**
