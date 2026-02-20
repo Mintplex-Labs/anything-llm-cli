@@ -20,7 +20,7 @@ const MIME_TYPES: Record<string, string> = {
 	".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 };
 
-export default function fileToAttachment(filePath: string) {
+export function fileToAttachment(filePath: string) {
 	const resolved = resolve(filePath);
 	const ext = extname(resolved).toLowerCase();
 	const mime = MIME_TYPES[ext];
