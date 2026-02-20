@@ -16,6 +16,10 @@
 		"cli",
 		"ai"
 	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Mintplex-Labs/anything-llm-cli"
+	},
 	"license": "MIT",
 	"scripts": {
 		"setup": "cp .env.example .env.local && bun install",
