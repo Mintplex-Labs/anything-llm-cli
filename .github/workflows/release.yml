@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -33,3 +34,15 @@ jobs:
             dist/any-windows-x64.exe
             dist/any-darwin-x64
             dist/any-darwin-arm64
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
