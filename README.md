@@ -71,7 +71,7 @@ bun run build
 
 ## Setup
 
-You can generate an API key from your AnythingLLM instance under **Settings > Developer API**.
+The only required setup is your API key. You can generate one from your AnythingLLM instance under **Settings > Developer API**.
 
 If running from source, fill in your `.env.local` file — Bun loads it automatically.
 
@@ -79,9 +79,11 @@ For the npm package or standalone binary, set environment variables directly:
 
 ```bash
 export ANYTHING_LLM_API_KEY="your-api-key"
-export ANYTHING_LLM_BASE_URL="https://my-instance.example.com"  # default: http://localhost:3001
+export ANYTHING_LLM_BASE_URL="https://my-instance.example.com"  # optional, default: http://localhost:3001
 export ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG="my-workspace"       # optional, avoids needing -w
 ```
+
+If no workspace is specified via `-w` or the environment variable, the CLI will automatically create and use a default workspace.
 
 > **Tip:** Add these to your `.bashrc`, `.zshrc`, or `.env` file for persistence.
 
@@ -103,7 +105,7 @@ Running `any` with no arguments displays the help screen.
 
 | Flag | Description |
 | --- | --- |
-| `-w, --workspace <slug>` | **(required)** Workspace slug (or set `ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG`) |
+| `-w, --workspace <slug>` | Workspace slug. Falls back to `ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG` env var, or auto-creates a default workspace |
 | `-a, --attach <path...>` | Attach files to the prompt (images, PDFs, etc.) |
 | `-t, --thread [slug]` | Use a specific thread for the conversation |
 | `--nt, --new-thread` | Start a new thread for this conversation |
