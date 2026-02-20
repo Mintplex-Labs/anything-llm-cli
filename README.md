@@ -34,7 +34,7 @@ This installs the `any` command globally.
 
 ### Standalone binary
 
-Download a prebuilt binary for your platform from the [Releases](https://github.com/mintplex-labs/anyllm-cli/releases) page and place it somewhere on your `PATH`.
+Download a prebuilt binary for your platform from the [Releases](https://github.com/mintplex-labs/anything-llm-cli/releases) page and place it somewhere on your `PATH`.
 
 | Platform      | Binary               |
 | ------------- | -------------------- |
@@ -49,8 +49,8 @@ Download a prebuilt binary for your platform from the [Releases](https://github.
 Requires [Bun](https://bun.sh).
 
 ```bash
-git clone https://github.com/mintplex-labs/anyllm-cli.git
-cd anyllm-cli
+git clone https://github.com/mintplex-labs/anything-llm-cli.git
+cd anything-llm-cli
 bun run setup
 ```
 
