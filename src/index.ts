@@ -29,7 +29,7 @@ program
 	.alias("p")
 	.description("Send a prompt")
 	.argument("<message...>", "The prompt message to send")
-	.requiredOption(
+	.option(
 		`-w, --workspace <slug>`,
 		"Workspace slug to use. Defaults to ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG environment variable.",
 		anythingLLmDefaultWorkspaceSlug,
@@ -73,10 +73,38 @@ program
 			baseUrl: process.env.ANYTHING_LLM_BASE_URL,
 		});
 
+		const workspaceSlug: string =
+			opts.workspace || "anythingllm-cli-default-workspace";
+
+		// If no workspace is specified and the ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG environment variable is not set, use a default workspace slug and ensure the workspace exists. This allows users to get started without needing to set up a workspace first.
+		if (workspaceSlug === "anythingllm-cli-default-workspace") {
+			const getWorkspaceResult = await llm.workspaces.get({
+				slug: workspaceSlug,
+			});
+
+			if (!getWorkspaceResult.ok) {
+				console.error(
+					`Failed to get workspace "${workspaceSlug}": ${getWorkspaceResult.error}`,
+				);
+				process.exit(1);
+			}
+
+			if (getWorkspaceResult.data.workspace.length === 0) {
+				const workspaceResult = await llm.workspaces.create({
+					name: `AnythingLLM CLI Default Workspace`,
+					systemPrompt: `You are a helpful assistant responding to prompts from the AnythingLLM CLI tool. You will sometimes receive context passed in from the stdinput.`,
+				});
+
+				if (!workspaceResult.ok) {
+					console.error(`Failed to create workspace: ${workspaceResult.error}`);
+					process.exit(1);
+				}
+			}
+		}
 		let threadSlug: string | undefined = opts.thread;
 		if (opts.newThread) {
 			const threadResult = await llm.threads.create({
-				workspaceSlug: opts.workspace || anythingLLmDefaultWorkspaceSlug,
+				workspaceSlug,
 				title: `AnythingLLM CLI Thread - ${new Date().toLocaleString()}`,
 			});
 
@@ -93,11 +121,11 @@ program
 				? await llm.threads.chat({
 						threadSlug,
 						message: constructedPrompt,
-						workspaceSlug: opts.workspace,
+						workspaceSlug,
 						attachments,
 					})
 				: await llm.workspaces.chat({
-						slug: opts.workspace,
+						slug: workspaceSlug,
 						message: constructedPrompt,
 						attachments,
 					});
@@ -111,7 +139,6 @@ program
 			return;
 		}
 
-		const workspaceSlug = opts.workspace;
 		const stream = threadSlug
 			? llm.threads.streamChat({
 					workspaceSlug,
