@@ -145,14 +145,29 @@ export async function buildBanner(): Promise<string> {
 	if (!isHealthy) {
 		lines.push(empty());
 
-		const centeredLines = [
-			"Could not connect to your AnythingLLM instance.",
-			"Ensure it is running and these env vars are set:",
-		];
+		const baseUrl = process.env.ANYTHING_LLM_BASE_URL;
+		const hasBaseUrl = !!baseUrl;
+		const isPosix = process.platform !== "win32";
 
-		for (const cl of centeredLines) {
-			const left = Math.max(0, Math.floor((W - cl.length) / 2));
-			lines.push(row(" ".repeat(left) + warn(cl), left + cl.length));
+		const center = (text: string, style: (t: string) => string) => {
+			const left = Math.max(0, Math.floor((W - text.length) / 2));
+			lines.push(row(" ".repeat(left) + style(text), left + text.length));
+		};
+
+		if (hasBaseUrl) {
+			center("Could not connect to your AnythingLLM instance.", warn);
+			center("Ensure your instance is running and reachable.", warn);
+		} else {
+			center("Welcome! No AnythingLLM connection configured.", warn);
+		}
+
+		lines.push(empty());
+
+		if (isPosix) {
+			center("Run `any setup` to get started.", dim);
+			center("Or set these environment variables:", dim);
+		} else {
+			center("Set these environment variables to connect:", dim);
 		}
 
 		lines.push(empty());
@@ -167,7 +182,7 @@ export async function buildBanner(): Promise<string> {
 		const envLeft = Math.max(0, Math.floor((W - maxEnvLen) / 2));
 
 		for (const el of envLines) {
-			lines.push(row(" ".repeat(envLeft) + warn(el), envLeft + el.length));
+			lines.push(row(" ".repeat(envLeft) + dim(el), envLeft + el.length));
 		}
 	}
 
