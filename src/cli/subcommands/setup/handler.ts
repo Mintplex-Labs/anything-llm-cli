@@ -74,9 +74,10 @@ export async function setupHandler() {
 	}
 
 	const anythingLlmBaseUrl = await text({
-		message: "Enter your AnythingLLM Base URL (default: http://localhost:3001)",
-		placeholder: "https://myanythingllminstance.com",
+		message: "AnythingLLM instance URL (default is AnythingLLM Desktop)",
+		placeholder: "http://localhost:3001",
 		defaultValue: "http://localhost:3001",
+
 		validate: (value) => {
 			if (!value) return undefined;
 			try {
