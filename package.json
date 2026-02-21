@@ -1,6 +1,6 @@
 {
 	"name": "@mintplex-labs/anything-llm-cli",
-	"version": "0.0.9",
+	"version": "0.0.10",
 	"description": "A CLI tool to interact with AnythingLLM from the terminal",
 	"type": "module",
 	"bin": {
