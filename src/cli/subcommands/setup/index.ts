@@ -5,6 +5,6 @@ export function registerSetupCommand(program: Command) {
 	program
 		.command("setup")
 		.alias("s")
-		.description("Configure the AnythingLLM CLI settings")
+		.description("Setup the connection to your AnythingLLM instance")
 		.action(setupHandler);
 }

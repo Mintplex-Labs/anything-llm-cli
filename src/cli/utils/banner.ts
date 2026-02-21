@@ -1,7 +1,7 @@
 import packageJson from "../../../package.json";
 
 async function health(): Promise<boolean> {
-	const baseUrl = process.env.ANYTHING_LLM_BASE_URL || "http://localhost:3001";
+	const baseUrl = process.env.ANYTHING_LLM_BASE_URL;
 	try {
 		const res = await fetch(`${baseUrl}/api/ping`, {
 			method: "GET",
@@ -113,6 +113,34 @@ export async function buildBanner(): Promise<string> {
 	// Tagline - centered
 	const tagLeft = Math.floor((W - tagline.length) / 2);
 	lines.push(row(" ".repeat(tagLeft) + dim(tagline), tagLeft + tagline.length));
+
+	if (isHealthy) {
+		lines.push(empty());
+		const baseUrl =
+			process.env.ANYTHING_LLM_BASE_URL || "http://localhost:3001";
+		const isDesktop = baseUrl === "http://localhost:3001";
+
+		let statusText: string;
+		if (isDesktop) {
+			statusText = "● Connected to AnythingLLM Desktop";
+		} else {
+			const prefix = "● Connected to AnythingLLM Web · ";
+			const maxUrlLen = W - prefix.length;
+			const displayUrl =
+				baseUrl.length > maxUrlLen
+					? `${baseUrl.slice(0, maxUrlLen - 1)}…`
+					: baseUrl;
+			statusText = `${prefix}${displayUrl}`;
+		}
+
+		const statusLeft = Math.max(0, Math.floor((W - statusText.length) / 2));
+		lines.push(
+			row(
+				" ".repeat(statusLeft) + rgb(90, 200, 170, statusText),
+				statusLeft + statusText.length,
+			),
+		);
+	}
 
 	if (!isHealthy) {
 		lines.push(empty());
