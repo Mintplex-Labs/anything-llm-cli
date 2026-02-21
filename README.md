@@ -62,13 +62,27 @@ Download a prebuilt binary from the [Releases](https://github.com/mintplex-labs/
 
 2. **Set your environment variables:**
 
+   #### macOS / Linux
+
+   Run the interactive setup command to configure your environment automatically:
+
    ```bash
-   export ANYTHING_LLM_API_KEY="your-api-key"
-   # Optional — defaults to http://localhost:3001
-   export ANYTHING_LLM_BASE_URL="https://my-instance.example.com"
+   any setup
    ```
 
-   > **Tip:** Add these to your `.bashrc` or `.zshrc` for persistence.
+   This will prompt you for your instance type, base URL, and API key, then write the appropriate exports to your shell config file (`.zshrc`, `.bashrc`, or `config.fish`).
+
+   #### Windows
+
+   Windows users need to set environment variables manually:
+
+   ```powershell
+   # PowerShell (current session)
+   $env:ANYTHING_LLM_BASE_URL = "https://my-instance.example.com"
+   $env:ANYTHING_LLM_API_KEY = "your-api-key"
+
+   # To persist across sessions, use System Environment Variables settings
+   ```
 
 3. **Send your first prompt:**
 
@@ -80,9 +94,13 @@ That's it! If no workspace is specified, the CLI will automatically create and u
 
 ## Usage
 
-```
-any prompt <message> [options]
-```
+### `any setup` (alias: `s`)
+
+Interactive setup wizard that configures your AnythingLLM connection. Prompts for your instance type (Desktop or Cloud/Self-Hosted), base URL, and API key, then writes the environment variables to your shell config file.
+
+> **Note:** Only available on macOS and Linux. Windows users must set environment variables manually.
+
+### `any prompt <message>` (alias: `p`)
 
 ### Options
 
@@ -125,11 +143,11 @@ any prompt "Write a summary" > summary.md
 
 ## Environment Variables
 
-| Variable                              | Required | Default                 | Description                                       |
-| ------------------------------------- | -------- | ----------------------- | ------------------------------------------------- |
-| `ANYTHING_LLM_API_KEY`                | Yes      | —                       | Your AnythingLLM API key                          |
-| `ANYTHING_LLM_BASE_URL`               | No       | `http://localhost:3001` | Base URL of your AnythingLLM instance             |
-| `ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG` | No       | —                       | Default workspace slug (avoids needing `-w` flag) |
+| Variable                              | Required | Default | Description                                       |
+| ------------------------------------- | -------- | ------- | ------------------------------------------------- |
+| `ANYTHING_LLM_API_KEY`                | Yes      | —       | Your AnythingLLM API key                          |
+| `ANYTHING_LLM_BASE_URL`               | Yes      | —       | Base URL of your AnythingLLM instance             |
+| `ANYTHING_LLM_DEFAULT_WORKSPACE_SLUG` | No       | —       | Default workspace slug (avoids needing `-w` flag) |
 
 ## Development
 
