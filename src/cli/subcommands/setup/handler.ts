@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { isCancel, log, note, password, text } from "@clack/prompts";
+import { isCancel, log, note, password, select, text } from "@clack/prompts";
 
 type ShellType = "bash" | "zsh" | "fish";
 
@@ -73,28 +73,48 @@ export async function setupHandler() {
 		process.exit(1);
 	}
 
-	const anythingLlmBaseUrl = await text({
-		message: "AnythingLLM instance URL (default is AnythingLLM Desktop)",
-		placeholder: "http://localhost:3001",
-		defaultValue: "http://localhost:3001",
-
-		validate: (value) => {
-			if (!value) return undefined;
-			try {
-				const url = new URL(value);
-				if (url.protocol !== "http:" && url.protocol !== "https:")
-					return "Base URL must start with http:// or https://";
-				if (!url.hostname) return "Base URL must include a hostname";
-			} catch {
-				return "Base URL must be a valid URL (e.g. https://my-instance.com)";
-			}
-			return undefined;
-		},
+	const selection = await select({
+		message: "What type of AnythingLLM instance are you connecting to?",
+		options: [
+			{ value: "desktop", label: "AnythingLLM Desktop" },
+			{ value: "web", label: "AnythingLLM Cloud or Self-Hosted" },
+		],
 	});
 
-	if (isCancel(anythingLlmBaseUrl)) {
+	if (isCancel(selection)) {
 		log.warn("Setup cancelled.");
 		return;
+	}
+
+	const isDesktop = selection === "desktop";
+	// const isDesktop = await confirm({
+	//   message: "Are you using AnythingLLM Desktop?",
+	// });
+
+	let anythingLlmBaseUrl = "http://localhost:3001";
+	if (!isDesktop) {
+		anythingLlmBaseUrl = (await text({
+			message: "Enter your AnythingLLM instance URL",
+			placeholder: "https://my-anythingllm-instance.com",
+
+			validate: (value) => {
+				if (!value) return "URL is required";
+				try {
+					const url = new URL(value);
+					if (url.protocol !== "http:" && url.protocol !== "https:")
+						return "Base URL must start with http:// or https://";
+					if (!url.hostname) return "Base URL must include a hostname";
+				} catch {
+					return "Base URL must be a valid URL (e.g. https://my-instance.com)";
+				}
+				return undefined;
+			},
+		})) as string;
+
+		if (isCancel(anythingLlmBaseUrl)) {
+			log.warn("Setup cancelled.");
+			return;
+		}
 	}
 
 	const anythingLlmApiKey = await password({
