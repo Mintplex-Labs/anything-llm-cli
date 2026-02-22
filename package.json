@@ -36,7 +36,8 @@
 		"build:all": "bun run build:linux-x64 && bun run build:linux-arm64 && bun run build:windows-x64 && bun run build:darwin-x64 && bun run build:darwin-arm64",
 		"patch": "bun pm version patch",
 		"minor": "bun pm version minor",
-		"major": "bun pm version major"
+		"major": "bun pm version major",
+		"pushTags": "git push && git push --tags"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.15",
