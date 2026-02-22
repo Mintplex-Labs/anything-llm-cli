@@ -150,10 +150,73 @@ export async function promptHandler(
 		process.stdout.write(text);
 	};
 
+	let inThinkBlock = false;
+	let tagBuffer = "";
+
+	// Returns the length of a suffix of `text` that matches a prefix of `tag`,
+	// so we can buffer partial tags across streaming chunks.
+	const findPartialTagSuffix = (text: string, tag: string): number => {
+		for (let len = Math.min(text.length, tag.length - 1); len > 0; len--) {
+			if (text.endsWith(tag.substring(0, len))) return len;
+		}
+		return 0;
+	};
+
+	// Process streamed text that may contain <think>...</think> tags.
+	// Strips the tags, dims thinking content, and writes the real response normally.
+	const processTextToken = (text: string) => {
+		const combined = tagBuffer + text;
+		tagBuffer = "";
+		let pos = 0;
+
+		while (pos < combined.length) {
+			if (!inThinkBlock) {
+				const openIdx = combined.indexOf("<think>", pos);
+				if (openIdx !== -1) {
+					if (openIdx > pos) writeResponse(combined.substring(pos, openIdx));
+					inThinkBlock = true;
+					process.stdout.write(`${dim}Thinking...\n`);
+					pos = openIdx + 7;
+				} else {
+					const remainder = combined.substring(pos);
+					const partial = findPartialTagSuffix(remainder, "<think>");
+					if (partial > 0) {
+						const safe = remainder.substring(0, remainder.length - partial);
+						if (safe) writeResponse(safe);
+						tagBuffer = remainder.substring(remainder.length - partial);
+					} else {
+						writeResponse(remainder);
+					}
+					pos = combined.length;
+				}
+			} else {
+				const closeIdx = combined.indexOf("</think>", pos);
+				if (closeIdx !== -1) {
+					if (closeIdx > pos)
+						process.stdout.write(combined.substring(pos, closeIdx));
+					process.stdout.write(`\n...done thinking.${reset}\n`);
+					inThinkBlock = false;
+					pos = closeIdx + 8;
+				} else {
+					const remainder = combined.substring(pos);
+					const partial = findPartialTagSuffix(remainder, "</think>");
+					if (partial > 0) {
+						const safe = remainder.substring(0, remainder.length - partial);
+						if (safe) process.stdout.write(safe);
+						tagBuffer = remainder.substring(remainder.length - partial);
+					} else {
+						process.stdout.write(remainder);
+					}
+					pos = combined.length;
+				}
+			}
+		}
+	};
+
 	for await (const chunk of stream) {
 		// Regular (non-agent) chat token
 		if (chunk.type === "textResponseChunk") {
-			writeResponse(chunk.textResponse);
+			processTextToken(chunk.textResponse);
 		} else if (chunk.type === "agentThought") {
 			endAssembly();
 			process.stdout.write(`${dim}${chunk.thought}${reset}\n`);
@@ -172,6 +235,17 @@ export async function promptHandler(
 			}
 		}
 	}
+
+	// Flush any remaining buffered partial-tag content
+	if (tagBuffer) {
+		if (inThinkBlock) {
+			process.stdout.write(tagBuffer);
+		} else {
+			writeResponse(tagBuffer);
+		}
+	}
+	// Ensure dim is reset if stream ended mid-think
+	if (inThinkBlock) process.stdout.write(reset);
 
 	process.stdout.write("\n");
 }
