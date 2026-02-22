@@ -33,7 +33,10 @@
 		"build:windows-x64": "bun build --compile --minify --target=bun-windows-x64 --outfile=dist/any-windows-x64.exe src/index.ts",
 		"build:darwin-x64": "bun build --compile --minify --target=bun-darwin-x64 --outfile=dist/any-darwin-x64 src/index.ts",
 		"build:darwin-arm64": "bun build --compile --minify --target=bun-darwin-arm64 --outfile=dist/any-darwin-arm64 src/index.ts",
-		"build:all": "bun run build:linux-x64 && bun run build:linux-arm64 && bun run build:windows-x64 && bun run build:darwin-x64 && bun run build:darwin-arm64"
+		"build:all": "bun run build:linux-x64 && bun run build:linux-arm64 && bun run build:windows-x64 && bun run build:darwin-x64 && bun run build:darwin-arm64",
+		"patch": "bun pm version patch",
+		"minor": "bun pm version minor",
+		"major": "bun pm version major"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.15",
