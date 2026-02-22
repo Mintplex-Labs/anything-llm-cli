@@ -165,7 +165,7 @@ bun run build          # Compile native binary → dist/any
 
 ```bash
 # If installed via install script
-sudo rm /usr/local/bin/any
+sudo rm ~/.local/bin/any
 
 # If installed via package manager
 npm uninstall -g @mintplex-labs/anything-llm-cli
