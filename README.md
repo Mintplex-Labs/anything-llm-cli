@@ -30,7 +30,7 @@ A command-line interface for chatting with your [AnythingLLM](https://anythingll
 curl -fsSL https://raw.githubusercontent.com/Mintplex-Labs/anything-llm-cli/main/install.sh | sh
 ```
 
-This detects your platform, downloads the latest binary, and installs it to `/usr/local/bin`. Run it again to update.
+This detects your platform, downloads the latest binary, and installs it to `~/.local/bin`. Run it again to update.
 
 ### Via package manager
 
