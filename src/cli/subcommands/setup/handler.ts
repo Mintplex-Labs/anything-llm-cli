@@ -50,17 +50,21 @@ async function writeToShellConfig(
 		? await readFile(configPath, "utf-8")
 		: "";
 
-	for (const [key, value] of Object.entries(vars)) {
-		const pattern = getExportPattern(shell, key);
-		const exportLine = formatExportLine(shell, key, value);
-
-		if (pattern.test(content)) {
-			content = content.replace(pattern, exportLine);
-		} else {
-			if (content.length > 0 && !content.endsWith("\n")) content += "\n";
-			content += `${exportLine}\n`;
-		}
+	// Remove any existing AnythingLLM variable lines and comment header
+	for (const key of Object.keys(vars)) {
+		content = content.replace(getExportPattern(shell, key), "");
 	}
+	content = content.replace(/^# AnythingLLM CLI$/m, "");
+
+	// Clean up excessive blank lines left by removals, then trim end
+	content = content.replace(/\n{3,}/g, "\n\n").trimEnd();
+
+	// Build grouped block with comment header
+	const exportLines = Object.entries(vars)
+		.map(([key, value]) => formatExportLine(shell, key, value))
+		.join("\n");
+
+	content += `\n\n# AnythingLLM CLI\n${exportLines}\n`;
 
 	await writeFile(configPath, content, "utf-8");
 }
