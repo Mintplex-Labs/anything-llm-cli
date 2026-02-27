@@ -12,8 +12,56 @@ async function health(): Promise<boolean> {
 		return false;
 	}
 }
+
+async function isValidApiKey(): Promise<
+	{ ok: true; data: boolean } | { ok: false; error: string }
+> {
+	const baseUrl = process.env.ANYTHING_LLM_BASE_URL;
+	const apiKey = process.env.ANYTHING_LLM_API_KEY;
+	// if (!baseUrl || !apiKey)
+	//   return {
+	//     ok: false,
+	//     error: "Base URL or API key is missing",
+	//   };
+
+	try {
+		const res = await fetch(`${baseUrl}/api/v1/auth`, {
+			headers: { Authorization: `Bearer ${apiKey}` },
+			signal: AbortSignal.timeout(2000),
+		});
+		const data = (await res.json()) as {
+			authenticated?: boolean;
+			error?: string;
+		};
+		if (!res.ok) {
+			if (data.error) {
+				return {
+					ok: false,
+					error: data.error,
+				};
+			} else {
+				return {
+					ok: false,
+					error: "Unknown error",
+				};
+			}
+		}
+
+		return {
+			ok: true,
+			data: data.authenticated === true,
+		};
+	} catch (e) {
+		return {
+			ok: false,
+			error: e instanceof Error ? e.message : String(e),
+		};
+	}
+}
 export async function buildBanner(): Promise<string> {
 	const isHealthy = await health();
+	const keyResult = isHealthy ? await isValidApiKey() : null;
+	const hasValidKey = keyResult?.ok && keyResult.data;
 
 	const rgb = (r: number, g: number, b: number, t: string) =>
 		`\x1b[1;38;2;${r};${g};${b}m${t}\x1b[0m`;
@@ -21,21 +69,34 @@ export async function buildBanner(): Promise<string> {
 	const warn = (t: string) => `\x1b[1;38;5;214m${t}\x1b[0m`;
 
 	const br = isHealthy
-		? (t: string) => rgb(90, 200, 170, t)
+		? hasValidKey
+			? (t: string) => rgb(90, 200, 170, t)
+			: (t: string) => rgb(214, 180, 60, t)
 		: (t: string) => rgb(200, 60, 60, t);
 
 	const lerp = (a: number, b: number, t: number) => Math.round(a + (b - a) * t);
 	const gradient = isHealthy
-		? (i: number, total: number, text: string) => {
-				// Mint green (#46FFC8) to ice blue (#7BCFE0)
-				const t = i / (total - 1);
-				return rgb(
-					lerp(70, 123, t),
-					lerp(255, 207, t),
-					lerp(200, 224, t),
-					text,
-				);
-			}
+		? hasValidKey
+			? (i: number, total: number, text: string) => {
+					// Mint green (#46FFC8) to ice blue (#7BCFE0)
+					const t = i / (total - 1);
+					return rgb(
+						lerp(70, 123, t),
+						lerp(255, 207, t),
+						lerp(200, 224, t),
+						text,
+					);
+				}
+			: (i: number, total: number, text: string) => {
+					// Warm amber to gold
+					const t = i / (total - 1);
+					return rgb(
+						lerp(214, 230, t),
+						lerp(160, 180, t),
+						lerp(40, 60, t),
+						text,
+					);
+				}
 		: (i: number, total: number, text: string) => {
 				// Dark red to bright red
 				const t = i / (total - 1);
@@ -114,7 +175,7 @@ export async function buildBanner(): Promise<string> {
 	const tagLeft = Math.floor((W - tagline.length) / 2);
 	lines.push(row(" ".repeat(tagLeft) + dim(tagline), tagLeft + tagline.length));
 
-	if (isHealthy) {
+	if (isHealthy && hasValidKey) {
 		lines.push(empty());
 		const baseUrl =
 			process.env.ANYTHING_LLM_BASE_URL || "http://localhost:3001";
@@ -140,6 +201,28 @@ export async function buildBanner(): Promise<string> {
 				statusLeft + statusText.length,
 			),
 		);
+	}
+
+	if (isHealthy && !hasValidKey) {
+		lines.push(empty());
+
+		const center = (text: string, style: (t: string) => string) => {
+			const left = Math.max(0, Math.floor((W - text.length) / 2));
+			lines.push(row(" ".repeat(left) + style(text), left + text.length));
+		};
+
+		// const errMsg =
+		//   keyResult && !keyResult.ok ? keyResult.error : "API key is invalid";
+		center(`API is reachable but the API key is invalid`, warn);
+
+		lines.push(empty());
+
+		const isPosix = process.platform !== "win32";
+		if (isPosix) {
+			center("Run `any setup` to reconfigure your API key.", dim);
+		} else {
+			center("Update your ANYTHING_LLM_API_KEY environment variable.", dim);
+		}
 	}
 
 	if (!isHealthy) {
